@@ -213,7 +213,12 @@ module Vanity
       file_path = File.join(config_path, file_name)
 
       if File.exist?(file_path) # rubocop:todo Style/GuardClause
-        config = YAML.safe_load(ERB.new(File.read(file_path)).result, [], [], true)
+        config =
+          if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.1")
+            YAML.safe_load(ERB.new(File.read(file_path)).result, aliases: true)
+          else
+            YAML.safe_load(ERB.new(File.read(file_path)).result, [], [], true)
+          end
         config ||= {}
         params_for_environment = config[environment.to_s]
 
